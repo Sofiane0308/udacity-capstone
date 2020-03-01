@@ -1,5 +1,5 @@
 service:
-  name: serverless-todo-app
+  name: doc-drive
 
 plugins:
   - serverless-webpack
@@ -15,8 +15,8 @@ provider:
   region: ${opt:region, 'us-east-2'}
 
   environment:
-    TODOS_TABLE: todos_table-${self:provider.stage}
-    S3_BUCKET: todo-s3-${self:provider.stage}
+    TODOS_TABLE: docs_table-${self:provider.stage}
+    S3_BUCKET: doc-s3-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
 
 #TODO: add custom configuration
@@ -29,15 +29,15 @@ custom:
     api:
       info:
         version: v1.0.0
-        title: Serverless Todos 
+        title: Serverless Docs 
         description: Nanodegree cloud developer project
     models:
-      - name: CreateTodo
+      - name: CreateDoc
         contentType: application/json
-        schema: ${file(models/create-todo-model.json)}
-      - name: UpdateTodo
+        schema: ${file(models/create-doc-model.json)}
+      - name: UpdateDoc
         contentType: application/json
-        schema: ${file(models/update-todo-model.json)}
+        schema: ${file(models/update-doc-model.json)}
 
 functions:
 
@@ -46,77 +46,77 @@ functions:
 
   # TODO: Configure this function
   GetTodos:
-    handler: src/lambda/http/getTodos.handler
+    handler: src/lambda/http/getDocs.handler
     events:
       - http:
           method: get
-          path: todos
+          path: docs
           cors: true
           authorizer: Auth
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:Query
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DOCS_TABLE}
 
 
   # TODO: Configure this function
   CreateTodo:
-    handler: src/lambda/http/createTodo.handler
+    handler: src/lambda/http/createDoc.handler
     events:
       - http:
           method: post
-          path: todos
+          path: docs
           cors: true
           authorizer: Auth
           reqValidatorName: RequestValidator
           documentation:
             requestModels:
-              'application/json': CreateTodo
+              'application/json': CreateDoc
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:PutItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DOCS_TABLE}
 
 
   # TODO: Configure this function
   UpdateTodo:
-    handler: src/lambda/http/updateTodo.handler
+    handler: src/lambda/http/updateDoc.handler
     events:
       - http:
           method: patch
-          path: todos/{todoId}
+          path: docs/{docId}
           cors: true
           authorizer: Auth
           reqValidatorName: RequestValidator
           documentation:
             requestModels:
-              'application/json': UpdateTodo
+              'application/json': UpdateDoc
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:UpdateItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DOCS_TABLE}
 
   # TODO: Configure this function
   DeleteTodo:
-    handler: src/lambda/http/deleteTodo.handler
+    handler: src/lambda/http/deleteDoc.handler
     events:
       - http:
           method: delete
-          path: todos/{todoId}
+          path: docs/{docId}
           cors: true
           authorizer: Auth
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:DeleteItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DOCS_TABLE}
       - Effect: Allow
         Action:
           - dynamodb:Query
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DOCS_TABLE}
 
   # TODO: Configure this function
   GenerateUploadUrl:
@@ -124,7 +124,7 @@ functions:
     events:
       - http:
           method: post
-          path: todos/{todoId}/attachment
+          path: docs/{docId}/attachment
           cors: true
           authorizer: Auth
     iamRoleStatementsName: GenerateUploadUrl-Role       
@@ -132,11 +132,11 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:UpdateItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DOCS_TABLE}
       - Effect: Allow
         Action:
           - dynamodb:Query
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DOCS_TABLE}
       - Effect: Allow
         Action:
           - s3:PutObject
@@ -174,15 +174,15 @@ resources:
         AttributeDefinitions:
           - AttributeName: userId
             AttributeType: S
-          - AttributeName: todoId
+          - AttributeName: docId
             AttributeType: S
         KeySchema:
           - AttributeName: userId
             KeyType: HASH
-          - AttributeName: todoId
+          - AttributeName: docId
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
-        TableName: ${self:provider.environment.TODOS_TABLE} 
+        TableName: ${self:provider.environment.DOCS_TABLE} 
     AttachmentBucket:
       Type: AWS::S3::Bucket
       Properties:
