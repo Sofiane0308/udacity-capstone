@@ -15,7 +15,7 @@ provider:
   region: ${opt:region, 'us-east-2'}
 
   environment:
-    TODOS_TABLE: docs_table-${self:provider.stage}
+    DOCS_TABLE: docs_table-${self:provider.stage}
     S3_BUCKET: doc-s3-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
 

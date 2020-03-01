@@ -2,21 +2,21 @@ import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler } from 'aws-lambda'
 import * as middy from 'middy';
 import { cors } from 'middy/middlewares';
-import { getTodos } from '../../Logic/todos-controller';
+import { getDocs } from '../../Logic/docs-controller';
 import { createLogger } from '../../utils/logger';
 
-const logger = createLogger('get-Todos-Handler');
+const logger = createLogger('get-Docs-Handler');
 
 const allHandler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent, ): Promise<APIGatewayProxyResult> => {
   // TODO: Get all TODO items for a current user
 
-  logger.info('Get todos', event);
+  logger.info('Get docs', event);
 
   const authorization = event.headers.Authorization;
   const split = authorization.split(' ');
   const jwtToken = split[1];
 
-  const items = await getTodos(jwtToken);
+  const items = await getDocs(jwtToken);
 
   return {
     statusCode: 200,
